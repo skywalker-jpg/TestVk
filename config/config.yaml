@@ -1,0 +1,13 @@
+db:
+  password: "111"
+  host: "172.17.0.1"
+  ssl_mode: "disable"
+  user: "postgres"
+  port: "5432"
+
+logger:
+  sink: "stdout"
+  level: "debug"
+
+auth_token:
+  admin: "1"

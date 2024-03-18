@@ -1,0 +1,330 @@
+openapi: 3.0.0
+info:
+  title: Filmoteka API
+  description: API для управления актерами в базе данных Filmoteka
+  version: 1.0.0
+servers:
+  - url: http://example.com/api
+paths:
+  /actors/add:
+    post:
+      summary: Добавить актера
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                  description: Имя актера
+      responses:
+        '201':
+          description: Актер успешно добавлен
+          content:
+            text/plain:
+              schema:
+                type: string
+        '400':
+          description: Неверный запрос или отсутствие тела запроса
+        '500':
+          description: Ошибка сервера при добавлении актера
+  /actors/update:
+    post:
+      summary: Обновить актера
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                id:
+                  type: integer
+                  description: Уникальный идентификатор актера
+                name:
+                  type: string
+                  description: Новое имя актера
+      responses:
+        '201':
+          description: Актер успешно обновлен
+          content:
+            text/plain:
+              schema:
+                type: string
+        '400':
+          description: Неверный запрос или отсутствие тела запроса
+        '500':
+          description: Ошибка сервера при обновлении актера
+  /actors/delete:
+    delete:
+      summary: Удалить актера
+      parameters:
+        - in: query
+          name: id
+          schema:
+            type: integer
+          required: true
+          description: Уникальный идентификатор актера, которого следует удалить
+      responses:
+        '200':
+          description: Актер успешно удален
+          content:
+            text/plain:
+              schema:
+                type: string
+        '400':
+          description: Неверный запрос или отсутствие идентификатора актера
+        '500':
+          description: Ошибка сервера при удалении актера
+  /movies/add:
+    post:
+      summary: Добавить фильм
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                title:
+                  type: string
+                  description: Название фильма
+                description:
+                  type: string
+                  description: Описание фильма
+                releaseDateStr:
+                  type: string
+                  format: date
+                  description: Дата выхода фильма (в формате YYYY-MM-DD)
+                rating:
+                  type: number
+                  description: Рейтинг фильма
+      responses:
+        '200':
+          description: Фильм успешно добавлен
+          content:
+            text/plain:
+              schema:
+                type: string
+        '400':
+          description: Неверный запрос или отсутствие обязательных данных
+        '500':
+          description: Ошибка сервера при добавлении фильма
+  /movies/update:
+    post:
+      summary: Обновить фильм
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Movie'
+      responses:
+        '200':
+          description: Информация о фильме успешно обновлена
+          content:
+            text/plain:
+              schema:
+                type: string
+        '400':
+          description: Неверный запрос или отсутствие тела запроса
+        '500':
+          description: Ошибка сервера при обновлении информации о фильме
+  /movies/update_actors:
+    post:
+      summary: Обновить список актеров для фильма
+      parameters:
+        - in: query
+          name: movie_id
+          schema:
+            type: integer
+          required: true
+          description: Уникальный идентификатор фильма
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: integer
+              description: Уникальный идентификатор актера, которого нужно добавить к фильму
+      responses:
+        '200':
+          description: Список актеров для фильма успешно обновлен
+          content:
+            text/plain:
+              schema:
+                type: string
+        '400':
+          description: Неверный запрос или отсутствие необходимых данных
+        '500':
+          description: Ошибка сервера при обновлении списка актеров для фильма
+  /movies/delete:
+    delete:
+      summary: Удалить фильм
+      parameters:
+        - in: query
+          name: id
+          schema:
+            type: integer
+          required: true
+          description: Уникальный идентификатор фильма, который следует удалить
+      responses:
+        '200':
+          description: Фильм успешно удален
+          content:
+            text/plain:
+              schema:
+                type: string
+        '400':
+          description: Неверный запрос или отсутствие идентификатора фильма
+        '500':
+          description: Ошибка сервера при удалении фильма
+  /movies:
+    get:
+      summary: Получить список фильмов
+      parameters:
+        - in: query
+          name: sort_by
+          schema:
+            type: string
+          description: Поле для сортировки (title, rating, release_date)
+        - in: query
+          name: sort_order
+          schema:
+            type: string
+            enum: [ asc, desc ]
+          description: Направление сортировки (asc, desc)
+      responses:
+        '200':
+          description: Успешный запрос, возвращает список фильмов
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Movie'
+        '400':
+          description: Неверный запрос или отсутствие обязательных параметров
+        '500':
+          description: Ошибка сервера при получении списка фильмов
+  /movies/search:
+    get:
+      summary: Поиск фильмов по фрагменту названия или имени актёра
+      parameters:
+        - in: query
+          name: title_fragment
+          schema:
+            type: string
+          description: Фрагмент названия фильма
+        - in: query
+          name: actor_name_fragment
+          schema:
+            type: string
+          description: Фрагмент имени актёра
+      responses:
+        '200':
+          description: Успешный запрос, возвращает список фильмов
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Movie'
+        '400':
+          description: Неверный запрос или отсутствие обязательных параметров
+        '500':
+          description: Ошибка сервера при поиске фильмов
+  /movies/search_by_actor:
+    get:
+      summary: Поиск фильмов по имени актёра
+      parameters:
+        - in: query
+          name: actor_name
+          schema:
+            type: string
+          description: Имя актёра
+      responses:
+        '200':
+          description: Успешный запрос, возвращает список фильмов
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Movie'
+        '400':
+          description: Неверный запрос или отсутствие обязательных параметров
+        '500':
+          description: Ошибка сервера при поиске фильмов
+  /actors:
+    get:
+      summary: Получить список актёров
+      responses:
+        '200':
+          description: Успешный запрос, возвращает список актёров
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Actor'
+        '500':
+          description: Ошибка сервера при получении списка актёров
+  /actors/movies:
+    get:
+      summary: Получить список фильмов по имени актёра
+      parameters:
+        - in: query
+          name: actor_name
+          schema:
+            type: string
+          description: Имя актёра
+      responses:
+        '200':
+          description: Успешный запрос, возвращает список фильмов
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Movie'
+        '400':
+          description: Неверный запрос или отсутствие обязательных параметров
+        '500':
+          description: Ошибка сервера при получении списка фильмов по имени актёра
+components:
+  schemas:
+    Movie:
+      type: object
+      properties:
+        id:
+          type: integer
+          description: Уникальный идентификатор фильма
+        title:
+          type: string
+          description: Название фильма
+        description:
+          type: string
+          description: Описание фильма
+        releaseDate:
+          type: string
+          format: date
+          description: Дата выхода фильма
+        rating:
+          type: number
+          description: Рейтинг фильма
+      required:
+        - id
+        - title
+        - releaseDate
+    Actor:
+      type: object
+      properties:
+        id:
+          type: integer
+          description: Уникальный идентификатор актёра
+        name:
+          type: string
+          description: Имя актёра
